@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin · OBM Agencement</title>
+<link rel="icon" href="/img/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+
+<main class="auth" id="auth" hidden>
+  <form class="auth__box" id="authForm" novalidate>
+    <img src="/img/logo.png" alt="OBM Agencement" width="193" height="40">
+    <h1 id="authTitle">Espace administrateur</h1>
+    <p class="muted" id="authLead">Connectez-vous pour gérer le catalogue et le stock.</p>
+    <label id="fCodeRow" hidden>Code de mise en service<input id="fCode" autocomplete="off"></label>
+    <label id="fNameRow" hidden>Nom<input id="fName" autocomplete="name"></label>
+    <label>E-mail<input id="fEmail" type="email" autocomplete="username" required></label>
+    <label>Mot de passe<input id="fPass" type="password" autocomplete="current-password" required></label>
+    <p class="err" id="authErr" hidden></p>
+    <button class="btn btn--red" type="submit" id="authBtn">Se connecter</button>
+  </form>
+</main>
+
+<div class="app" id="app" hidden>
+  <header class="top">
+    <a href="/" class="top__logo" target="_blank" rel="noopener"><img src="/img/logo.png" alt="OBM Agencement" width="160" height="33"></a>
+    <nav class="tabs" id="tabs">
+      <button data-tab="dash" class="on">Tableau de bord</button>
+      <button data-tab="leads">Demandes <b id="newCount" hidden></b></button>
+      <button data-tab="products">Articles</button>
+      <button data-tab="stock">Stock <b id="alertCount" hidden></b></button>
+      <button data-tab="users" data-admin>Comptes</button>
+      <button data-tab="audit">Journal</button>
+    </nav>
+    <div class="top__user">
+      <span id="meName"></span>
+      <button class="link" id="pwdBtn">Mot de passe</button>
+      <button class="link" id="logoutBtn">Déconnexion</button>
+    </div>
+  </header>
+
+  <section class="view" id="v-dash">
+    <div class="dash-head">
+      <div><h1 id="hello">Tableau de bord</h1><p class="muted small" id="dashUpdated"></p></div>
+      <div class="seg" id="period" role="group" aria-label="Période">
+        <button data-p="7">7 jours</button><button data-p="30" class="on">30 jours</button><button data-p="90">90 jours</button><button data-p="365">12 mois</button>
+      </div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="dgrid">
+      <article class="card chart chart--wide"><header><h2>Demandes reçues</h2><div class="legend"><span><i class="sw sw--1"></i>Devis</span><span><i class="sw sw--2"></i>Rappel</span></div></header><div id="cTime" class="cols-chart"></div></article>
+      <article class="card chart"><header><h2>Où en sont les demandes</h2><span class="muted small">reçues sur la période</span></header><div id="cStatus"></div></article>
+      <article class="card chart"><header><h2>Secteurs</h2></header><div id="cSector"></div></article>
+      <article class="card chart"><header><h2>Origine</h2><span class="muted small">premier contact</span></header><div id="cSource"></div></article>
+      <article class="card chart"><header><h2>Articles les plus demandés</h2><span class="muted small">nombre de demandes</span></header><div id="cItems"></div></article>
+      <article class="card chart chart--wide"><header><h2>Dernières demandes</h2><button class="link" data-goto="leads">Toutes les demandes →</button></header>
+        <div class="table-wrap table-wrap--flat"><table class="tbl" id="recent"><thead><tr><th>N°</th><th>Reçue</th><th>Contact</th><th>Ville</th><th>Besoin</th><th>Statut</th></tr></thead><tbody></tbody></table></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="view" id="v-leads" hidden>
+    <div class="bar">
+      <input type="search" id="lSearch" placeholder="Rechercher : nom, société, ville, n°…">
+      <select id="lStatus"><option value="">Tous les statuts</option></select>
+      <select id="lType"><option value="">Devis et rappels</option><option value="devis">Devis</option><option value="rappel">Rappels</option></select>
+      <select id="lWho"><option value="">Tous les commerciaux</option><option value="-">Non attribuées</option></select>
+      <span class="muted" id="lCount"></span>
+      <button class="btn btn--line" id="csvBtn">Exporter (CSV)</button>
+    </div>
+    <div class="table-wrap"><table class="tbl" id="lTable">
+      <thead><tr><th>N°</th><th>Reçue</th><th>Contact</th><th>Ville</th><th>Secteur</th><th class="num">Articles</th><th>Origine</th><th>Suivi par</th><th class="num">Montant</th><th>Statut</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+
+  <section class="view" id="v-products" hidden>
+    <div class="bar">
+      <input type="search" id="pSearch" placeholder="Rechercher : nom, référence, modèle…">
+      <select id="pFam"><option value="">Toutes les familles</option></select>
+      <span class="muted" id="pCount"></span>
+      <button class="btn btn--red" id="newBtn">+ Nouvel article</button>
+    </div>
+    <div class="table-wrap"><table class="tbl" id="pTable">
+      <thead><tr><th></th><th>Réf.</th><th>Article</th><th>Famille</th><th>Origine</th><th class="num">Stock</th><th>Site</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+
+  <section class="view" id="v-stock" hidden>
+    <div class="bar">
+      <input type="search" id="sSearch" placeholder="Rechercher un article…">
+      <label class="check"><input type="checkbox" id="sAlerts"> Alertes seulement</label>
+      <input id="sReason" placeholder="Motif du mouvement (facultatif) : livraison, réception…">
+    </div>
+    <div class="table-wrap"><table class="tbl" id="sTable">
+      <thead><tr><th></th><th>Réf.</th><th>Article</th><th class="num">En stock</th><th>Mouvement</th><th class="num">Seuil d’alerte</th><th>État</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+
+  <section class="view" id="v-users" hidden>
+    <div class="cols">
+      <div class="card">
+        <h2>Comptes</h2>
+        <table class="tbl" id="uTable"><thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th><th>Dernière connexion</th><th></th></tr></thead><tbody></tbody></table>
+      </div>
+      <form class="card form" id="uForm" novalidate>
+        <h2>Ajouter un compte</h2>
+        <label>Nom<input name="name" required></label>
+        <label>E-mail<input name="email" type="email" required></label>
+        <label>Rôle
+          <select name="role"><option value="editor">Éditeur : articles et stock</option><option value="admin">Administrateur : tout, y compris les comptes</option></select>
+        </label>
+        <label>Mot de passe provisoire (10 caractères minimum)<input name="password" type="text" minlength="10" required autocomplete="new-password"></label>
+        <p class="muted small">Communiquez-le à la personne : elle pourra le changer depuis « Mot de passe ».</p>
+        <button class="btn btn--red" type="submit">Créer le compte</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="view" id="v-audit" hidden>
+    <div class="card"><h2>Journal des modifications</h2><ul class="log" id="log"></ul></div>
+  </section>
+</div>
+
+<div class="drawer" id="editor" hidden>
+  <div class="drawer__bg" data-close></div>
+  <form class="drawer__box" id="pForm" novalidate>
+    <header><h2 id="eTitle">Nouvel article</h2><button type="button" class="x" data-close aria-label="Fermer">×</button></header>
+    <div class="drawer__body">
+      <div class="grid2">
+        <label>Nom (français) *<input name="name" maxlength="140" required></label>
+        <label>Modèle / code fournisseur<input name="tag" maxlength="40" placeholder="ex. ES-408"></label>
+        <label>Famille *<select name="f" required></select></label>
+        <label>Sous-famille *<input name="sub" list="subList" maxlength="80" required><datalist id="subList"></datalist></label>
+        <label>Origine
+          <select name="origin"><option value="tanger">Fabriqué à Tanger</option><option value="distribue">Distribué (fournisseur)</option><option value="a-confirmer">À confirmer</option></select>
+        </label>
+        <div class="field"><span>Secteurs</span>
+          <div class="chips" id="eSectors">
+            <label><input type="checkbox" value="industrie"> Industrie</label><label><input type="checkbox" value="logistique"> Logistique</label>
+            <label><input type="checkbox" value="ecoles"> Écoles</label><label><input type="checkbox" value="bureaux"> Bureaux</label>
+            <label><input type="checkbox" value="commerces"> Commerces</label>
+          </div>
+        </div>
+      </div>
+      <label>Description<textarea name="desc" rows="3" maxlength="600"></textarea></label>
+
+      <div class="field"><span>Photos * <small class="muted">— la première est la photo principale</small></span>
+        <div class="photos" id="ePhotos"></div>
+        <label class="btn btn--line upload">+ Ajouter des photos<input type="file" id="eFiles" accept="image/*" multiple hidden></label>
+      </div>
+
+      <div class="field"><span>Caractéristiques <small class="muted">— 3 lignes ou plus : fiche « détaillée » sur le site</small></span>
+        <div id="eSpecs"></div>
+        <button type="button" class="btn btn--line btn--sm" id="addSpec">+ Ligne</button>
+      </div>
+
+      <div class="grid3">
+        <label>Stock<input name="stock" type="number" min="0" value="0"></label>
+        <label>Seuil d’alerte<input name="alert" type="number" min="0" value="0"></label>
+        <label class="check check--box"><input type="checkbox" name="visible" checked> Visible sur le site</label>
+      </div>
+      <label>Note interne (non publiée)<input name="note" maxlength="500"></label>
+
+      <details class="i18n">
+        <summary>Traductions (facultatives — à défaut, le français s’affiche)</summary>
+        <div id="eI18n"></div>
+      </details>
+      <p class="err" id="eErr" hidden></p>
+    </div>
+    <footer>
+      <button type="button" class="btn btn--line" data-close>Annuler</button>
+      <button type="submit" class="btn btn--red" id="eSave">Enregistrer</button>
+    </footer>
+  </form>
+</div>
+
+<div class="drawer" id="leadBox" hidden>
+  <div class="drawer__bg" data-close></div>
+  <form class="drawer__box" id="lForm" novalidate>
+    <header><div><h2 id="ldTitle"></h2><p class="muted small" id="ldSub"></p></div><button type="button" class="x" data-close aria-label="Fermer">×</button></header>
+    <div class="drawer__body" id="ldBody"></div>
+    <footer><button type="button" class="btn btn--line" id="ldDel" data-admin>Supprimer</button><span style="flex:1"></span><button type="button" class="btn btn--line" data-close>Fermer</button><button type="submit" class="btn btn--red" id="ldSave">Enregistrer</button></footer>
+  </form>
+</div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
+<div class="dialog" id="dialog" hidden>
+  <div class="dialog__box">
+    <h3 id="dTitle"></h3><p id="dText"></p>
+    <div id="dBody"></div>
+    <div class="dialog__act"><button class="btn btn--line" id="dNo">Annuler</button><button class="btn btn--red" id="dYes">Confirmer</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="/data.js"></script>
+<script src="/admin/admin.js"></script>
+</body>
+</html>
